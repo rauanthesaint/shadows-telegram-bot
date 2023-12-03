@@ -1,0 +1,21 @@
+{
+  "name": "shadows-telegram-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "node-telegram-bot-api": "^0.64.0",
+    "nodemon": "^3.0.2",
+    "pdfkit": "^0.14.0",
+    "qrcode": "^1.5.3"
+  }
+}
