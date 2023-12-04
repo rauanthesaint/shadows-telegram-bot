@@ -7,6 +7,7 @@ import qrcode from 'qrcode';
 // imports
 import Customer from './customer.js';
 import { Messages } from './script-messages.js';
+import { addUser, getUsers } from './users-controller.js';
 
 // Load environment variables from a .env file into process.env
 dotenv.config();
@@ -43,7 +44,7 @@ bot.onText(/\/start/, async (message) => {
             inline_keyboard: [
                 [
                     {
-                        text: 'Узнать о меропприятий',
+                        text: 'Узнать о меропприятии',
                         url: 'https://instagram.com/saints.battle',
                     },
                 ],
@@ -57,7 +58,6 @@ bot.onText(/\/start/, async (message) => {
         }),
     });
 });
-
 
 // handling buttons
 bot.on('callback_query', (callbackQuery) => {
@@ -148,7 +148,7 @@ bot.on('callback_query', (message) => {
 bot.on('callback_query', async (message) => {
     if (message.data !== 'recipe-valid') return null;
     const userId = message.message.text.split('\n')[0].split(': ')[1];
-
+    addUser(userId);
     const customerNumber = message.message.text.split('\n')[1];
     const customerDate = message.message.text.split('\n')[4];
 
@@ -201,6 +201,10 @@ bot.on('callback_query', async (message) => {
 
     doc.image('./assets/shadowslogo.png', 64, 24, {
         fit: [32, 32],
+    });
+
+    doc.image('./assets/18plus.png', 314, 24, {
+        fit: [58.36, 24],
     });
 
     doc.lineJoin('round');
@@ -261,7 +265,11 @@ bot.on('callback_query', async (message) => {
     doc.font('./assets/font/JetBrainsMono-Bold.ttf')
         .fillColor('#A3A3A3')
         .fontSize(10);
-    doc.text(customerDate.replace(/\/(East Kazakhstan Time)/), MARGIN + 180, MARGIN + 164);
+    doc.text(
+        customerDate.replace(' (East Kazakhstan Time)', ''),
+        MARGIN + 180,
+        MARGIN + 164
+    );
     doc.text(customerNumber, MARGIN + 180, MARGIN + 198);
 
     const options = {
@@ -291,7 +299,10 @@ bot.on('callback_query', async (message) => {
         const buffer = Buffer.concat(buffers);
 
         // Send the PDF as a document to the Telegram chat
-        bot.sendDocument(userId, buffer, { filename: 'example.pdf', caption: Messages.desc })
+        bot.sendDocument(userId, buffer, {
+            filename: 'example.pdf',
+            caption: Messages.desc,
+        })
             .then(() => console.log('PDF sent successfully'))
             .catch((error) => console.error('Error sending PDF:', error));
     });
@@ -310,4 +321,19 @@ bot.on('callback_query', (message) => {
         chat_id: message.message.chat.id,
         message_id: message.message.message_id,
     });
+});
+
+bot.onText(/\/getGuestsNumber/, async (message) => {
+    const id = '-1001923399192';
+    await bot.getChat(id).then((chatInfo) => {
+        console.log(chatInfo);
+        // const messages_count = chatInfo.messages_count - 1;
+        // bot.sendMessage(message.chat.id, `Продано билетов: ${messages_count}`)
+    });
+});
+
+bot.onText(/\/sendAll (.+)/, (message, match) => {
+    getUsers().forEach(id => {
+        bot.sendMessage(id, match[1])
+    })
 });
